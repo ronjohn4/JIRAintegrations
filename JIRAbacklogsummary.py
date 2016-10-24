@@ -59,46 +59,40 @@ return_json['Resolved'] = dict(Name='No Epic', Status='Resolved',
 # Load work item counts into Epic structure created above
 jql = 'project = PRODUTIL AND issuetype in (Story, Bug)'
 flds = 'id,key,summary,status,issuetype,customfield_16738,customfield_10002,description,customfield_12402,customfield_25677,customfield_16738,customfield_10300'
-url = base_url.format(jql, flds, 9999)
+response_json = current_session.query(getURL(), jql, flds, 9999)
 
-# todo-Add paging for big projects
-session_response = current_session.get(url)
+# print('total:{0}'.format(response_json['total']))
+# print('expand:{0}'.format(response_json['expand']))
+issues_json = response_json['issues']
 
-if session_response.status_code == 200:
-    response_json = json.loads(session_response.text)
-    # print('total:{0}'.format(response_json['total']))
-    # print('expand:{0}'.format(response_json['expand']))
-    issues_json = response_json['issues']
+for issue in issues_json:
+    if issue['fields']['customfield_10300']:
+        key = issue['fields']['customfield_10300']
+    else:
+        key = issue['fields']['status']['name']
 
-    for issue in issues_json:
-        if issue['fields']['customfield_10300']:
-            key = issue['fields']['customfield_10300']
-        else:
-            key = issue['fields']['status']['name']
+    return_json[key]['Total'] += 1
+    if issue['fields']['issuetype']['name'] == 'Story':
+        return_json[key]['Story'] += 1
+    if issue['fields']['issuetype']['name'] == 'Bug':
+        return_json[key]['Bug'] += 1
+    if issue['fields']['status']['name'] in ('In Progress', 'Product Acceptance', 'In Review'):
+        return_json[key]['InProgress'] += 1
+    if issue['fields']['status']['name'] in ('Closed', 'Resolved'):
+        return_json[key]['Done'] += 1
+    if issue['fields']['customfield_10002']:
+        return_json[key]['Sized'] += 1
 
-        return_json[key]['Total'] += 1
-        if issue['fields']['issuetype']['name'] == 'Story':
-            return_json[key]['Story'] += 1
-        if issue['fields']['issuetype']['name'] == 'Bug':
-            return_json[key]['Bug'] += 1
-        if issue['fields']['status']['name'] in ('In Progress', 'Product Acceptance', 'In Review'):
-            return_json[key]['InProgress'] += 1
-        if issue['fields']['status']['name'] in ('Closed', 'Resolved'):
-            return_json[key]['Done'] += 1
-        if issue['fields']['customfield_10002']:
-            return_json[key]['Sized'] += 1
+    try:
+        if issue['fields']['customfield_16738'][0]['value'] == 'Impediment':
+            return_json[key]['Flagged'] += 1
+    except:
+        pass
 
-        try:
-            if issue['fields']['customfield_16738'][0]['value'] == 'Impediment':
-                return_json[key]['Flagged'] += 1
-        except:
-            pass
+    if (issue['fields']['issuetype']['name'] == 'Story' and issue['fields']['customfield_12402']) or \
+            (issue['fields']['issuetype']['name'] == 'Bug' and issue['fields']['customfield_25677']):
+        return_json[key]['WellFormed'] += 1
 
-        if (issue['fields']['issuetype']['name'] == 'Story' and issue['fields']['customfield_12402']) or \
-                (issue['fields']['issuetype']['name'] == 'Bug' and issue['fields']['customfield_25677']):
-            return_json[key]['WellFormed'] += 1
-else:
-    pass
 
 # print the stats
 display_list = []
