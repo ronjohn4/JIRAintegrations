@@ -1,6 +1,4 @@
 import dataprint
-import requests
-import json
 from jira import *
 
 return_json = {}
@@ -12,19 +10,13 @@ if not getURL() or not getsessionURL() or not getUsername() or not getPassword()
     exit(0)
 
 current_session = jirasession(getsessionURL(), getUsername(), getPassword())
-response_json = current_session.query(getURL(), jql, flds, 9999)
 
 # load epic structure in rank order
-# print('total:{0}'.format(response_json['total']))
-# print('expand:{0}'.format(response_json['expand']))
+response_json = current_session.query(getURL(), jql, flds, 9999)
 issues_json = response_json['issues']
 
 for seq, issue in enumerate(issues_json):
-    # print(seq, issue['fields']['summary'])
-    # return_json[issue['key']] = dict(Name=issue['fields']['summary'], Status=issue['fields']['status']['name'],
-    #                        Total=0, Story=0, Bug=0, WellFormed=0, Sized=0, Flagged=0, InProgress=0, Done=0)
-    # print('issue:{0}',format(issue))
-    if issue['fields']['status']['name'] == 'Closed':
+    if issue['fields']['status']['statusCategory']['name'] == 'Done':
         return_json[issue['key']] = dict(Name=issue['fields']['summary'], Status=issue['fields']['status']['name'],
                                          Total=0, Story=0, Bug=0, WellFormed=0, Sized=0, Flagged=0, InProgress=0,
                                          Done=0, Seq='', CloseDate=issue['fields']['resolutiondate'][:10])
@@ -33,36 +25,10 @@ for seq, issue in enumerate(issues_json):
                                          Total=0, Story=0, Bug=0, WellFormed=0, Sized=0, Flagged=0, InProgress=0,
                                          Done=0, Seq='{0:0>4}'.format(seq), CloseDate='')
 
-# Stats entry for work that doesn't have an epic
-return_json['In Progress'] = dict(Name='No Epic', Status='In_Progress',
-                                  Total=0, Story=0, Bug=0, WellFormed=0, Sized=0, Flagged=0, InProgress=0,
-                                  Done=0, Seq='0000', CloseDate='')
-return_json['Product Acceptance'] = dict(Name='No Epic', Status='Product_Acceptance',
-                                         Total=0, Story=0, Bug=0, WellFormed=0, Sized=0, Flagged=0, InProgress=0,
-                                         Done=0, Seq='0000', CloseDate='')
-return_json['In Review'] = dict(Name='No Epic', Status='In_Review',
-                                Total=0, Story=0, Bug=0, WellFormed=0, Sized=0, Flagged=0, InProgress=0,
-                                Done=0, Seq='0000', CloseDate='')
-return_json['Ready'] = dict(Name='No Epic', Status='Ready',
-                            Total=0, Story=0, Bug=0, WellFormed=0, Sized=0, Flagged=0, InProgress=0,
-                            Done=0, Seq='0000', CloseDate='')
-return_json['Design'] = dict(Name='No Epic', Status='Design',
-                             Total=0, Story=0, Bug=0, WellFormed=0, Sized=0, Flagged=0, InProgress=0,
-                             Done=0, Seq='0000', CloseDate='')
-return_json['Closed'] = dict(Name='No Epic', Status='Closed',
-                             Total=0, Story=0, Bug=0, WellFormed=0, Sized=0, Flagged=0, InProgress=0,
-                             Done=0, Seq='9999', CloseDate='')
-return_json['Resolved'] = dict(Name='No Epic', Status='Resolved',
-                               Total=0, Story=0, Bug=0, WellFormed=0, Sized=0, Flagged=0, InProgress=0,
-                               Done=0, Seq='9999', CloseDate='')
-
 # Load work item counts into Epic structure created above
 jql = 'project = PRODUTIL AND issuetype in (Story, Bug)'
 flds = 'id,key,summary,status,issuetype,customfield_16738,customfield_10002,description,customfield_12402,customfield_25677,customfield_16738,customfield_10300'
 response_json = current_session.query(getURL(), jql, flds, 9999)
-
-# print('total:{0}'.format(response_json['total']))
-# print('expand:{0}'.format(response_json['expand']))
 issues_json = response_json['issues']
 
 for issue in issues_json:
@@ -70,6 +36,17 @@ for issue in issues_json:
         key = issue['fields']['customfield_10300']
     else:
         key = issue['fields']['status']['name']
+
+    # Stats entry for work that doesn't have an epic
+    if key not in return_json:
+        if issue['fields']['status']['statusCategory']['name'] == 'Done':
+            return_json[key] = dict(Name='No Epic', Status=key,
+                                    Total=0, Story=0, Bug=0, WellFormed=0, Sized=0, Flagged=0, InProgress=0,
+                                    Done=0, Seq='9999', CloseDate='')
+        else:
+            return_json[key] = dict(Name='No Epic', Status=key,
+                                    Total=0, Story=0, Bug=0, WellFormed=0, Sized=0, Flagged=0, InProgress=0,
+                                    Done=0, Seq='0000', CloseDate='')
 
     return_json[key]['Total'] += 1
     if issue['fields']['issuetype']['name'] == 'Story':
@@ -93,7 +70,6 @@ for issue in issues_json:
             (issue['fields']['issuetype']['name'] == 'Bug' and issue['fields']['customfield_25677']):
         return_json[key]['WellFormed'] += 1
 
-
 # print the stats
 display_list = []
 display_list.append(
@@ -116,8 +92,6 @@ for key, epic in return_json.items():
         epic['Seq'],
         epic['CloseDate']
     ])
-
-# print(dataprint.to_string(display_list, comments=None, comment_lead=''))
 
 def getKey(item):
     return '{0}{1}'.format(item[11], item[12])
