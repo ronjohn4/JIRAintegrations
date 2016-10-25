@@ -71,8 +71,6 @@ class jirasession(requests.Session):
 
     def query(self, url, jql, fields, maxresults):
         url = url + '/search?jql={0}&fields={1}&maxResults={2}'.format(jql, fields, maxresults)
-        print(url)
-        print(self)
         session_response = self.get(url)
         if session_response.status_code != 200:
             raise Exception(session_response.status_code)
