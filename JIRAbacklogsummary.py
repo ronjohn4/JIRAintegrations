@@ -1,5 +1,5 @@
 import dataprint
-from jira import *
+from JIRAframework import *
 
 return_json = {}
 jql = 'project = PRODUTIL AND issuetype in (Epic) order by Rank'

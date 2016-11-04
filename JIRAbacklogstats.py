@@ -1,7 +1,7 @@
 # Ron Johnson
 # 10/23/2016
 import dataprint
-from jira import *
+from JIRAframework import *
 
 return_json = []
 jql = 'project = PRODUTIL AND issuetype in (Story, Bug) AND status not in (Closed, Complete, Resolved)'

@@ -1,6 +1,6 @@
 # Ron Johnson
 # 10/23/2016
-from jira import *
+from JIRAframework import *
 
 parms = ['PRODUTIL-768', 'PRODUTIL-721', 'ERROR-xxx']
 return_json = []
