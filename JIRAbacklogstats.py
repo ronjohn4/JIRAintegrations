@@ -1,7 +1,24 @@
 # Ron Johnson
 # 10/23/2016
+
+"""
+JIRA Backlog Stats
+
+Usage:
+  JIRAbacklogstats.py
+  JIRAbacklogstats.py  (-h | --help | -v | --version)
+
+Options:
+  -h --help        Show this screen.
+  -v --version     Show version.
+"""
+
 import dataprint
+from docopt import docopt
 from JIRAframework import *
+
+if __name__ == '__main__':
+    arguments = docopt(__doc__, version='JIRA Backlog Stats 1.0')
 
 return_json = []
 jql = 'project = PRODUTIL AND issuetype in (Story, Bug) AND status not in (Closed, Complete, Resolved)'

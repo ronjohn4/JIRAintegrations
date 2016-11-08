@@ -1,5 +1,25 @@
+# Ron Johnson
+# 10/23/2016
+
+"""
+JIRA Backlog Summary
+
+Usage:
+  JIRAbacklogsummary.py
+  JIRAbacklogsummary.py  (-h | --help | -v | --version)
+
+Options:
+  -h --help        Show this screen.
+  -v --version     Show version.
+"""
+
+from docopt import docopt
 import dataprint
 from JIRAframework import *
+
+if __name__ == '__main__':
+    arguments = docopt(__doc__, version='JIRA Backlog Summary 1.0')
+
 
 return_json = {}
 jql = 'project = PRODUTIL AND issuetype in (Epic) order by Rank'
