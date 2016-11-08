@@ -26,8 +26,10 @@ for seq, issue in enumerate(issues_json):
                                          Done=0, Seq='{0:0>4}'.format(seq), CloseDate='')
 
 # Load work item counts into Epic structure created above
-jql = 'project = PRODUTIL AND issuetype in (Story, Bug)'
-flds = 'id,key,summary,status,issuetype,customfield_16738,customfield_10002,description,customfield_12402,customfield_25677,customfield_16738,customfield_10300'
+jql = 'project = PRODUTIL AND issuetype in (Story, Bug) ' \
+      'and resolution not in ("Cannot Reproduce", Duplicate, Rejected, "Won\'t Do", "Won\'t Fix/Complete")'
+flds = 'id,key,summary,status,issuetype,customfield_16738,customfield_10002,description,customfield_12402,' \
+       'customfield_25677,customfield_16738,customfield_10300'
 response_json = current_session.query(getURL(), jql, flds, 9999)
 issues_json = response_json['issues']
 
@@ -93,8 +95,10 @@ for key, epic in return_json.items():
         epic['CloseDate']
     ])
 
+
 def getKey(item):
     return '{0}{1}'.format(item[11], item[12])
+
 
 sorted_display_list = sorted(display_list, key=getKey)
 print(dataprint.to_string(sorted_display_list, comments=None, comment_lead=''))

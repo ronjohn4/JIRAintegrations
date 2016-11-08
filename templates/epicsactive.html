@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<h2>Active Epics</h2>
+
+<table>
+    <tr>
+        <td>Key</td>
+        <td>Name</td>
+        <td>Status</td>
+        <td>Total</td>
+        <td>Bug</td>
+        <td>Story</td>
+        <td>Sized</td>
+        <td>Flagged</td>
+        <td>WellFormed</td>
+        <td>InProgress</td>
+        <td>Done</td>
+        <td>Seq</td>
+        <td>CloseDate</td>
+    </tr>
+    {% for entry in entries %}
+        <tr>
+            <td>{{entry.key}}</td>
+            <td>{{entry.name}}</td>
+            <td>{{entry.status}}</td>
+            <td>{{entry.total}}</td>
+            <td>{{entry.bug}}</td>
+            <td>{{entry.story}}</td>
+            <td>{{entry.sized}}</td>
+            <td>{{entry.flagged}}</td>
+            <td>{{entry.wellformed}}</td>
+            <td>{{entry.inprogress}}</td>
+            <td>{{entry.done}}</td>
+            <td>{{entry.seq}}</td>
+            <td>{{entry.closedate}}</td>
+        </tr>
+    {% else %}
+        <tr><td>No JIRA issues found</td></tr>
+    {% endfor %}
+
+</table>
+
+{% endblock %}
