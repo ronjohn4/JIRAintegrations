@@ -1,6 +1,8 @@
 # JIRA Integrations Scripts
 
-`JIRAWeb.py` - simply unformatted list of active epics and associated stats.  There is also a completed epic list.
+JIRA Integrations is a set of Python scripts used to access a JIRA project.  Scripts create Epic, backlog and project stats.  Command line scripts are Posix compliant and should provide sufficient help.
+
+`JIRAWeb.py` - simply unformatted list of active epics and associated stats.  There is also a completed epic list.  This list is presented in HTML using Flask.
 
 `JIRAbacklogstats.py` - command to display statistics on a backlog.
 
